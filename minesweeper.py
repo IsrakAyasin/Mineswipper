@@ -192,11 +192,10 @@ class MinesweeperAI():
                if they can be inferred from existing knowledge
         """
         self.moves_made.add(cell)
-        print("adding to mark_safe 3 :", (cell))
+        print("Move :", (cell))
 
         self.mark_safe(cell)
 
-        #self.knowledge.append(Sentence(cell, count))
         neighbors = set()
         for i in range(cell[0] - 1, cell[0] + 2):
             for j in range(cell[1] - 1, cell[1] + 2):
@@ -210,13 +209,42 @@ class MinesweeperAI():
 
         # Only create sentence if there are unknown neighbors
         if neighbors:
-            self.knowledge.append(Sentence(neighbors, count))
+            print("adding to knowgledge", neighbors, count)
+            new_sentence = Sentence(neighbors, count)
+            self.knowledge.append(new_sentence)
+
+            # Look for subset relationships to infer new sentences
+            knowledge_copy = self.knowledge.copy()
+            for sentence in knowledge_copy:
+                if sentence == new_sentence:
+                    continue
+                    
+                # If existing sentence is subset of new sentence
+                if sentence.cells.issubset(new_sentence.cells) and len(sentence.cells) < len(new_sentence.cells):
+                    remaining_cells = new_sentence.cells - sentence.cells
+                    remaining_count = new_sentence.count - sentence.count
+                    if remaining_cells and remaining_count >= 0:
+                        inferred_sentence = Sentence(remaining_cells, remaining_count)
+                        if inferred_sentence not in self.knowledge:
+                            print("adding to knowgledge 2", inferred_sentence)
+                            self.knowledge.append(inferred_sentence)
+                
+                # If new sentence is subset of existing sentence
+                elif new_sentence.cells.issubset(sentence.cells) and len(new_sentence.cells) < len(sentence.cells):
+                    remaining_cells = sentence.cells - new_sentence.cells
+                    remaining_count = sentence.count - new_sentence.count
+                    if remaining_cells and remaining_count >= 0:
+                        inferred_sentence = Sentence(remaining_cells, remaining_count)
+                        if inferred_sentence not in self.knowledge:
+                            print("adding to knowgledge 3 - newSentence", new_sentence.cells, new_sentence.count)
+                            print("adding to knowgledge 3 - OldKnowledge", sentence.cells, sentence.count)
+                            print("adding to knowgledge 3", inferred_sentence)
+                            self.knowledge.append(inferred_sentence)
 
         #if count is 0, mark all the nearby cells safe
         if count == 0:
             for i in range(cell[0] - 1, cell[0] + 2):
                 for j in range(cell[1] - 1, cell[1] + 2):
-
                     # Ignore the cell itself
                     if (i, j) == cell:
                         continue
@@ -225,21 +253,21 @@ class MinesweeperAI():
                     if 0 <= i < self.height and 0 <= j < self.width:
                         if((i,j) not in self.safes):
                             print("adding to mark_safe 1 :", (i,j))
-                            self.mark_safe((i,j))
+                            self.mark_safe((i,j))        
 
+        #check if we can infer anything from what we have in the knowledgebase
         for sentence in self.knowledge:
             safes = sentence.known_safes()
             if safes:
                 print("safes: ",safes)
+                print("sentence: ", sentence)
                 for i in safes.copy():
                     print("adding to mark_safe 2 :", (i))
-
                     self.mark_safe(i)
 
             mines = sentence.known_mines()
             if mines:
                 for i in mines.copy():
-
                     self.mark_mine(i)
 
 
@@ -252,11 +280,11 @@ class MinesweeperAI():
         This function may use the knowledge in self.mines, self.safes
         and self.moves_made, but should not modify any of those values.
         """
-        print("safe cells: ",self.safes)
-        print("moves made: ", self.moves_made)
+        #print("safe cells: ",self.safes)
+        #print("moves made: ", self.moves_made)
         for i in self.safes:
             if i not in self.moves_made:
-
+                print("safe move: ", i)
                 return i
         return None
 
