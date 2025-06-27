@@ -192,7 +192,6 @@ class MinesweeperAI():
                if they can be inferred from existing knowledge
         """
         self.moves_made.add(cell)
-        print("Move :", (cell))
 
         self.mark_safe(cell)
 
@@ -204,12 +203,12 @@ class MinesweeperAI():
                     continue
                 # Add cell if in bounds and not already known to be safe or mine
                 if 0 <= i < self.height and 0 <= j < self.width:
-                    if (i, j) not in self.safes and (i, j) not in self.mines:
+                    if (i, j) not in self.safes:
                         neighbors.add((i, j))
 
         # Only create sentence if there are unknown neighbors
         if neighbors:
-            print("adding to knowgledge", neighbors, count)
+            # print("adding to knowgledge", neighbors, count)
             new_sentence = Sentence(neighbors, count)
             self.knowledge.append(new_sentence)
 
@@ -226,7 +225,7 @@ class MinesweeperAI():
                     if remaining_cells and remaining_count >= 0:
                         inferred_sentence = Sentence(remaining_cells, remaining_count)
                         if inferred_sentence not in self.knowledge:
-                            print("adding to knowgledge 2", inferred_sentence)
+                            # print("adding to knowgledge 2", inferred_sentence)
                             self.knowledge.append(inferred_sentence)
                 
                 # If new sentence is subset of existing sentence
@@ -236,9 +235,9 @@ class MinesweeperAI():
                     if remaining_cells and remaining_count >= 0:
                         inferred_sentence = Sentence(remaining_cells, remaining_count)
                         if inferred_sentence not in self.knowledge:
-                            print("adding to knowgledge 3 - newSentence", new_sentence.cells, new_sentence.count)
-                            print("adding to knowgledge 3 - OldKnowledge", sentence.cells, sentence.count)
-                            print("adding to knowgledge 3", inferred_sentence)
+                            # print("adding to knowgledge 3 - newSentence", new_sentence.cells, new_sentence.count)
+                            # print("adding to knowgledge 3 - OldKnowledge", sentence.cells, sentence.count)
+                            # print("adding to knowgledge 3", inferred_sentence)
                             self.knowledge.append(inferred_sentence)
 
         #if count is 0, mark all the nearby cells safe
@@ -252,17 +251,17 @@ class MinesweeperAI():
                     # Update count if cell in bounds
                     if 0 <= i < self.height and 0 <= j < self.width:
                         if((i,j) not in self.safes):
-                            print("adding to mark_safe 1 :", (i,j))
+                            # print("adding to mark_safe 1 :", (i,j))
                             self.mark_safe((i,j))        
 
         #check if we can infer anything from what we have in the knowledgebase
         for sentence in self.knowledge:
             safes = sentence.known_safes()
             if safes:
-                print("safes: ",safes)
-                print("sentence: ", sentence)
+                # print("safes: ",safes)
+                # print("sentence: ", sentence)
                 for i in safes.copy():
-                    print("adding to mark_safe 2 :", (i))
+                    # print("adding to mark_safe 2 :", (i))
                     self.mark_safe(i)
 
             mines = sentence.known_mines()
@@ -284,7 +283,7 @@ class MinesweeperAI():
         #print("moves made: ", self.moves_made)
         for i in self.safes:
             if i not in self.moves_made:
-                print("safe move: ", i)
+                # print("safe move: ", i)
                 return i
         return None
 
